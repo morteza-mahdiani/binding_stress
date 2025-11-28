@@ -357,27 +357,3 @@ if __name__ == "__main__":
     main()
 # python sweep_and_plot_senario_based.py --meta_csv shapes_ds/metadata.csv --episodes 20  --ks 0 2  --tasks color_of_shape shape_of_color --outdir results_distinct  --probe_binding --icl_mode distinct  --seed 0
 
-
-'''
-i did this change:
-
-def postprocess(raw_text: str, task: str) -> str:
-    txt = normalize(raw_text)
-
-    # Tasks where the gold label is a COLOR
-    if task in ("color_of_shape", "color_only"):
-        for c in VALID_COLORS:
-            if c in txt:
-                return c
-
-    # Tasks where the gold label is a SHAPE
-    if task in ("shape_of_color", "shape_only"):
-        for sh in VALID_SHAPES:
-            if sh in txt:
-                return sh
-
-    # Fallback: if we didn't find a canonical token,
-    # return the normalized string for debugging/logs.
-    return txt
-
-'''
