@@ -55,6 +55,7 @@ def postprocess(raw_text: str, task: str) -> str:
     # fallback: return the cleaned token (won’t match gold but logs are useful)
     return txt
 
+
 def _extract_query_file_from_meta_or_msgs(qmeta: Dict[str, Any], messages: list) -> str | None:
     # Prefer what icl_episodes.make_episode returns
     if qmeta and "file" in qmeta:
@@ -81,8 +82,10 @@ def run_eval_core(messages: list, gold: str, task: str, qmeta: Dict[str, Any] | 
     3) Compares to gold (case-insensitive, normalized)
     4) Returns (ok, gold, pred, file)
     """
-    raw = qwen_infer(messages, max_new_tokens=4, temperature=0.0, top_p=1.0)
+    raw = qwen_infer(messages, max_new_tokens=4, temperature=0.0, do_sample=False)
+    # print(raw)
     pred = postprocess(raw, task)
+    # print(f"Task: {task} | Gold: {gold} | Pred: {pred}")
     ok = normalize(pred) == normalize(gold)
     file = _extract_query_file_from_meta_or_msgs(qmeta or {}, messages)
     return ok, gold, pred, file
@@ -336,6 +339,7 @@ def main():
         torch.manual_seed(args.seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(args.seed)
+            print(f"Set torch and torch.cuda seeds to {args.seed}")
     except ImportError:
         pass
     # -------------------------------

@@ -86,14 +86,14 @@ def main(
             split = "test" if (shape, color) in heldout else "train"
             fname = f"BIND_{shape}_{color}_{i:03d}.png"
             save_img(os.path.join(imgdir, fname), shape, COLORS[color])
-            add_row(fname, outdir + "/BIND", shape, color, False, split)
+            add_row(outdir + "/images/" + fname, "BIND", shape, color, False, split)
 
     # -------- Grayscale (shape only) --------
     for shape in SHAPES:
         for i in range(1 if debug else n_per_combo):
             fname = f"SHAPE_ONLY_{shape}_gray_{i:03d}.png"
             save_img(os.path.join(imgdir, fname), shape, GRAY)
-            add_row(fname, outdir + "/SHAPE_ONLY", shape, "gray", True, "train")
+            add_row(outdir + "/images/" + fname, "SHAPE_ONLY", shape, "gray", True, "train")
 
     # -------- Same-shape / different colors (color only) --------
     sfix = color_only_shape
@@ -101,7 +101,7 @@ def main(
         for i in range(1 if debug else n_per_combo):
             fname = f"COLOR_ONLY_{sfix}_{color}_{i:03d}.png"
             save_img(os.path.join(imgdir, fname), sfix, COLORS[color])
-            add_row(fname, outdir + "/COLOR_ONLY", sfix, color, False, "train")
+            add_row(outdir + "/images/" + fname, "COLOR_ONLY", sfix, color, False, "train")
 
     # -------- Same-color / different shapes (shape only with fixed color) --------
     cfix = shape_only_color
@@ -109,7 +109,7 @@ def main(
         for i in range(1 if debug else n_per_combo):
             fname = f"SHAPE_ONLY_FIXEDCOLOR_{shape}_{cfix}_{i:03d}.png"
             save_img(os.path.join(imgdir, fname), shape, COLORS[cfix])
-            add_row(fname, outdir + "/SHAPE_ONLY_FIXEDCOLOR", shape, cfix, False, "train")
+            add_row(outdir + "/images/" + fname, "SHAPE_ONLY_FIXEDCOLOR", shape, cfix, False, "train")
 
     # write metadata
     with open(meta_path, "w", newline="") as f:

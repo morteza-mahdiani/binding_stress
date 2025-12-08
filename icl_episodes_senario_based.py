@@ -264,7 +264,9 @@ def make_episode(samples, k=4, task="color_of_shape", icl_mode="random"):
         if tests:
             q = random.choice(tests)
         else:
-            q = random.choice(_filter_split(samples, condition="BIND", split=None))
+            testt = _filter_split(samples, condition="BIND", split=None)
+            print(testt)
+            q = random.choice(testt)
         shots_pool = _filter_split(samples, condition="BIND", split="train")
 
     elif task == "shape_only":

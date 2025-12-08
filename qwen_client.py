@@ -8,8 +8,8 @@ from PIL import Image
 from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
 from huggingface_hub import snapshot_download
 
-os.environ["HF_HOME"] = f"/scratch/{os.environ['USER']}/hf_cache"
-local_dir = f"/scratch/{os.environ['USER']}/models/Qwen2_5_VL_7B_Instruct"
+os.environ["HF_HOME"] = f"../scratch/{os.environ['USER']}/hf_cache"
+local_dir = f"../scratch/{os.environ['USER']}/models/Qwen2_5_VL_7B_Instruct"
 
 # ---- Config ----
 MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -37,11 +37,9 @@ def _ensure_loaded(device_map="auto"):
     _MODEL.eval()
 
 def get_model():
-    _ensure_loaded()
     return _MODEL
 
 def get_processor():
-    _ensure_loaded()
     return _PROCESSOR
 
 def get_tokenizer():
@@ -178,21 +176,22 @@ def qwen_infer(
     Runs one inference on Qwen2.5-VL with default-safe generation params,
     while allowing extra Hugging Face `generate` kwargs via **gen_kwargs.
     """
+    _ensure_loaded()
     proc = get_processor()
     model = get_model()
 
     prompt, images = _collect_images_and_template(messages)   # your helper
     inputs = proc(text=prompt, images=images, return_tensors="pt")
     inputs = {k: (v.to(model.device) if isinstance(v, torch.Tensor) else v) for k,v in inputs.items()}
-
+    input_ids_len = inputs["input_ids"].shape[1]
     # Merge defaults with user-supplied overrides
     generate_args = {
         "max_new_tokens": max_new_tokens,
         "temperature": temperature,
-        "top_p": top_p,
+        # "top_p": top_p,
         # good defaults for chatty VLMs:
         "do_sample": temperature > 0.0,
-        "use_cache": True,
+        # "use_cache": True,
     }
     generate_args.update(gen_kwargs)  # allow caller to override/add (e.g., repetition_penalty=1.1)
 
@@ -203,9 +202,16 @@ def qwen_infer(
         generate_args["do_sample"] = False
 
     with torch.no_grad():
+        # print(generate_args["do_sample"])
+        # print(messages)
         out = model.generate(**inputs, **generate_args)
-
+    # text = proc.batch_decode(out, skip_special_tokens=True)[0]
+    
+    
     # decode only the newly generated part
-    text = proc.batch_decode(out, skip_special_tokens=True)[0]
+    generated_ids = out[:, input_ids_len:]
+    # Decode only the generated slice
+    text = proc.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    # print(f"Raw model output: {text}")
     # If you used chat template, strip the prompt echo (optional, depends on template behavior)
     return text.strip()
